@@ -36,7 +36,17 @@ async function load(){
   el('status').innerText = 'Loading...';
   let events = [];
   if(mode==='daily'){
-    events = await fetchJson(`../data/events/${date}.json`);
+    // try several possible locations depending on how docs are served
+    const candidates = [
+      `/data/events/${date}.json`,
+      `data/events/${date}.json`,
+      `../data/events/${date}.json`,
+      `./data/events/${date}.json`
+    ];
+    for(const c of candidates){
+      const part = await fetchJson(c);
+      if(part && part.length){ events = part; break; }
+    }
   } else {
     // weekly: gather 7 days ending at date
     const start = new Date(date);
@@ -44,7 +54,18 @@ async function load(){
       const d = new Date(start);
       d.setDate(start.getDate()-i);
       const ds = dateToStr(d);
-      const part = await fetchJson(`../data/events/${ds}.json`);
+      // try root and docs-relative locations for each day
+      const candidates = [
+        `/data/events/${ds}.json`,
+        `data/events/${ds}.json`,
+        `../data/events/${ds}.json`,
+        `./data/events/${ds}.json`
+      ];
+      let part = [];
+      for(const c of candidates){
+        part = await fetchJson(c);
+        if(part && part.length) break;
+      }
       events = events.concat(part);
     }
   }
