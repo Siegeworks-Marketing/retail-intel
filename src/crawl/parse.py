@@ -1,8 +1,19 @@
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from datetime import datetime
 import logging
 import re
+
+# Common footer/nav link patterns to exclude
+EXCLUDE_PATTERNS = [
+    r'privacy|policy|terms|cookies|legal',
+    r'contact|help|support|faq',
+    r'accessibility|sitemap',
+    r'careers|jobs|press-kit',
+    r'social|facebook|twitter|linkedin|instagram',
+    r'subscribe|newsletter|email',
+    r'^https?://[^/]+/?$',  # homepage only
+]
 
 def parse(html: str, retailer: str, base_url: str = "", source_name: str = "") -> list:
     if not html:
@@ -29,6 +40,10 @@ def parse(html: str, retailer: str, base_url: str = "", source_name: str = "") -
         # require reasonably informative title
         if len(title) < 20:
             continue
+        
+        # filter out common navigation/footer patterns
+        if _is_nav_link(url, title):
+            continue
 
         items.append({
             'retailer': retailer,
@@ -40,6 +55,23 @@ def parse(html: str, retailer: str, base_url: str = "", source_name: str = "") -
 
     logging.debug("Parsed %d items for %s", len(items), retailer)
     return items
+
+def _is_nav_link(url: str, title: str) -> bool:
+    """Check if URL or title matches known nav/footer patterns to exclude."""
+    url_lower = url.lower()
+    title_lower = title.lower()
+    
+    # check against exclusion patterns
+    for pattern in EXCLUDE_PATTERNS:
+        if re.search(pattern, url_lower) or re.search(pattern, title_lower):
+            return True
+    
+    # filter out very generic titles (likely nav)
+    generic = ['home', 'about us', 'contact', 'careers', 'privacy', 'help', 'search', 'products', 'services']
+    if title_lower in generic:
+        return True
+    
+    return False
 
 def extract_date(soup) -> str:
     """Extract publication date from common meta tags and HTML patterns."""
