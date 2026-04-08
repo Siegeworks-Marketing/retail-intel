@@ -31,6 +31,19 @@
         <option value="Walgreens">Walgreens</option>
       </select>
     </label>
+    <label>Brand:
+      <select id="brand">
+        <option value="all">All</option>
+      </select>
+    </label>
+    <label>Sort:
+      <select id="sort">
+        <option value="relevance">Grouped (topic relevance)</option>
+        <option value="retailer">Retailer (A→Z)</option>
+        <option value="category">Category</option>
+        <option value="title">Title (A→Z)</option>
+      </select>
+    </label>
     <label>Mode:
       <select id="mode">
         <option value="daily">Daily</option>
@@ -41,7 +54,19 @@
     <span id="status" style="margin-left:8px;color:#666"></span>
   </div>
 
-  <div id="events"></div>
+  <div style="font-size:13px;color:#666;margin-bottom:8px">Tips: use <strong>Brand</strong> and <strong>Retailer</strong> to narrow results. <strong>Grouped</strong> sorts by topic clusters (useful to see where a retailer is focused).</div>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <h4>Top Topics</h4>
+      <div id="topics"></div>
+      <h4 style="margin-top:12px">Quick Filters</h4>
+      <div id="quick-filters"></div>
+    </aside>
+    <main id="main">
+      <div id="events"></div>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
