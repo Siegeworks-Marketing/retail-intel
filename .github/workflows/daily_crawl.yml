@@ -1,0 +1,24 @@
+name: Daily Retail Crawl
+
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python src/build/run_daily.py
+      - name: Commit data
+        run: |
+          git config user.name "retail-intel-bot"
+          git config user.email "bot@github.com"
+          git add data
+          git commit -m "Daily retail intelligence update" || echo "No changes"
+          git push
