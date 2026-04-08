@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 11 * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode: daily or weekly'
+        required: false
+        default: 'daily'
 
 jobs:
   crawl:
@@ -18,7 +23,7 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=src" >> $GITHUB_ENV
 
-      - run: python -m build.run_daily
+      - run: python -m build.run_daily --mode "${{ github.event.inputs.mode || 'daily' }}"
 
       - name: Commit data
         run: |

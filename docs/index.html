@@ -1,11 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Daily Retail Intelligence</title>
+  <meta charset="utf-8" />
+  <title>Helen of Troy — Retail Intelligence</title>
+  <style>
+    body{font-family:Segoe UI,Arial,Helvetica,sans-serif;margin:20px}
+    header{display:flex;align-items:center;gap:16px}
+    .brand{font-weight:700;color:#0b5394;font-size:20px}
+    .controls{margin:12px 0;display:flex;gap:8px;align-items:center}
+    #events{margin-top:12px}
+    .event{padding:8px;border-bottom:1px solid #eee}
+    .meta{color:#666;font-size:13px}
+  </style>
 </head>
 <body>
-  <h1>Daily Retail Brief</h1>
+  <header>
+    <img src="app_icon.png" alt="Helen of Troy" width="48" height="48" onerror="this.style.display='none'"/>
+    <div>
+      <div class="brand">Helen of Troy — Retail Intelligence</div>
+      <div class="meta">Daily/weekly crawl of retail press and announcements</div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <label>Date: <input type="date" id="date"></label>
+    <label>Retailer:
+      <select id="retailer">
+        <option value="all">All</option>
+        <option value="Amazon">Amazon</option>
+        <option value="Walmart">Walmart</option>
+        <option value="Target">Target</option>
+        <option value="CVS">CVS</option>
+        <option value="Walgreens">Walgreens</option>
+      </select>
+    </label>
+    <label>Mode:
+      <select id="mode">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </label>
+    <button id="load">Load</button>
+    <span id="status" style="margin-left:8px;color:#666"></span>
+  </div>
+
   <div id="events"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
