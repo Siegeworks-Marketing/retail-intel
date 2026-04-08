@@ -121,7 +121,16 @@ function renderEvent(e){
   const d = document.createElement('div');
   d.className = 'event';
   const brands = (e._brands && e._brands.length)?` <span style="color:#0b5394">[${e._brands.join(', ')}]</span>`:'';
-  d.innerHTML = `<div><strong>${e.retailer}</strong> — ${e.title} ${brands}</div><div class="meta"><a href="${e.source_url}" target="_blank">source</a> • ${e.category}</div>`;
+  const dateStr = e.pub_date ? `<span class="pub-date">${e.pub_date}</span>` : '';
+  const whyMatters = e.why_it_matters ? `<div class="why-matters">💡 ${e.why_it_matters}</div>` : '';
+  d.innerHTML = `
+    <div class="event-header">
+      <div><strong>${e.retailer}</strong> — ${e.title} ${brands}</div>
+      ${dateStr}
+    </div>
+    ${whyMatters}
+    <div class="meta"><a href="${e.source_url}" target="_blank">source</a> • ${e.category}</div>
+  `;
   return d;
 }
 
