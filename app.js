@@ -225,4 +225,9 @@ async function load(){
 }
 
 el('load').addEventListener('click', load);
+// auto-load on any control change
+['retailer','brand','sort','mode','date'].forEach(id=>{
+  const c = el(id);
+  if(c) c.addEventListener('change', load);
+});
 load();
