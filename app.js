@@ -117,6 +117,96 @@ function render(events, sortBy='relevance'){
   populateSidebar(Object.keys(topicCounts).sort((a,b)=>topicCounts[b]-topicCounts[a]).map(t=>({topic:t,count:topicCounts[t]})));
 }
 
+function generateTakeaways(events){
+  if(!events || events.length===0) return [];
+  
+  // score each event: tier-based (Tier 1 = 0, Tier 2 = 5, Tier 3 = 10px lower) + why_it_matters presence
+  const scored = events.map(e => {
+    let score = 0;
+    const tier = e.tier || '3';
+    if(tier==='1') score += 100;
+    else if(tier==='2') score += 50;
+    else score += 10;
+    
+    if(e.why_it_matters && e.why_it_matters.length > 0) score += 20;
+    
+    return { event: e, score: score };
+  });
+
+  // group by category + retailer
+  const grouped = {};
+  scored.forEach(item => {
+    const key = `${item.event.category}`;
+    if(!grouped[key]) grouped[key] = [];
+    grouped[key].push(item);
+  });
+
+  // sort within groups and extract top takeaway from each category
+  const takeaways = [];
+  Object.entries(grouped).forEach(([category, items]) => {
+    items.sort((a,b) => b.score - a.score);
+    if(items.length > 0) {
+      const top = items[0].event;
+      takeaways.push({
+        category: category,
+        retailer: top.retailer,
+        title: top.title,
+        insight: top.why_it_matters || top.snippet || top.title,
+        source_url: top.source_url,
+        pub_date: top.pub_date,
+        tier: top.tier
+      });
+    }
+  });
+
+  // rank by score and take top 5
+  const allScored = scored.map(item => ({
+    title: item.event.title,
+    insight: item.event.why_it_matters || item.event.snippet,
+    source_url: item.event.source_url,
+    category: item.event.category,
+    retailer: item.event.retailer,
+    pub_date: item.event.pub_date,
+    tier: item.event.tier,
+    score: item.score
+  }));
+  
+  allScored.sort((a,b) => b.score - a.score);
+  return allScored.slice(0, 5);
+}
+
+function renderTakeaways(takeaways){
+  const container = el('takeaways');
+  if(!container || !takeaways || takeaways.length===0){
+    if(container) container.innerHTML = '';
+    return;
+  }
+  
+  container.innerHTML = '<h3 style="color:#0b5394;margin-bottom:12px">📊 Key Takeaways</h3>';
+  const list = document.createElement('div');
+  list.className = 'takeaways-list';
+  
+  takeaways.forEach(tk => {
+    const card = document.createElement('div');
+    card.className = 'takeaway-card';
+    const tierBadge = `<span class="tier-badge tier-${tk.tier}">${tk.tier}</span>`;
+    const dateStr = tk.pub_date ? `<span style="color:#999;font-size:12px">${tk.pub_date}</span>` : '';
+    card.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <strong style="color:#0b5394">${tk.category}</strong>
+        ${tierBadge}
+        ${dateStr}
+      </div>
+      <div style="font-weight:600;margin-bottom:6px">${tk.retailer}</div>
+      <div style="font-size:14px;line-height:1.4;margin-bottom:8px">${tk.insight}</div>
+      <a href="${tk.source_url}" target="_blank" style="color:#0b5394;text-decoration:none;font-size:12px">→ Read more</a>
+    `;
+    list.appendChild(card);
+  });
+  
+  container.appendChild(list);
+}
+
 function renderEvent(e){
   const d = document.createElement('div');
   d.className = 'event';
@@ -230,6 +320,11 @@ async function load(){
   if(discovered.length) populateBrandSelect(discovered);
 
   el('status').innerText = '';
+  
+  // generate and render takeaways before main event list
+  const takeaways = generateTakeaways(events);
+  renderTakeaways(takeaways);
+  
   render(events, sort);
 }
 

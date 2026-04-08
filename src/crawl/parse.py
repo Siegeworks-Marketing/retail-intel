@@ -50,11 +50,36 @@ def parse(html: str, retailer: str, base_url: str = "", source_name: str = "") -
             'title': title,
             'url': url,
             'pub_date': pub_date,
-            'source_name': source_name
+            'source_name': source_name,
+            'snippet': extract_snippet(soup, url)  # extract og:description or summary
         })
 
     logging.debug("Parsed %d items for %s", len(items), retailer)
     return items
+
+def extract_snippet(soup, url: str) -> str:
+    """Extract article snippet/summary from OG tags or article schema."""
+    # try og:description
+    og_desc = soup.find('meta', property='og:description')
+    if og_desc and og_desc.get('content'):
+        return og_desc.get('content')[:200]
+    
+    # try article:summary or description meta tag
+    summary = soup.find('meta', {'name': 'description'}) or \
+              soup.find('meta', property='article:summary')
+    if summary and summary.get('content'):
+        return summary.get('content')[:200]
+    
+    # fallback: extract first paragraph from body
+    try:
+        p = soup.find('p')
+        if p:
+            text = p.get_text(strip=True)
+            return text[:200] if text else ""
+    except:
+        pass
+    
+    return ""
 
 def _is_nav_link(url: str, title: str) -> bool:
     """Check if URL or title matches known nav/footer patterns to exclude."""

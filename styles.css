@@ -481,6 +481,61 @@ header {
   font-weight: 500;
 }
 
+/* Key Takeaways */
+#takeaways {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 16px;
+}
+
+#takeaways h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.takeaways-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.takeaway-card {
+  padding: 12px;
+  background: #f9fbff;
+  border: 1px solid #e0e8f5;
+  border-left: 4px solid var(--brand-color);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.takeaway-card:hover {
+  box-shadow: 0 2px 6px rgba(11, 83, 148, 0.15);
+  border-left-color: #0a3f73;
+}
+
+.tier-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+}
+
+.tier-badge.tier-1 {
+  background: #d32f2f;
+}
+
+.tier-badge.tier-2 {
+  background: #f57c00;
+}
+
+.tier-badge.tier-3 {
+  background: #fbc02d;
+  color: #333;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .layout {

@@ -13,6 +13,7 @@ def build_events(articles: list) -> list:
             'source_url': a['url'],
             'pub_date': a.get('pub_date', ''),
             'source_name': a.get('source_name', ''),
+            'snippet': a.get('snippet', ''),
             'why_it_matters': why_it_matters,
             'tier': a.get('tier', '3')  # default to tier 3 if not specified
         })
