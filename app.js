@@ -120,65 +120,126 @@ function render(events, sortBy='relevance'){
 function generateTakeaways(events){
   if(!events || events.length===0) return [];
   
-  // score each event: tier-based (Tier 1 = 0, Tier 2 = 5, Tier 3 = 10px lower) + why_it_matters presence
-  const scored = events.map(e => {
+  // STEP 1: Deduplicate by URL and fuzzy title match
+  const seenUrls = new Set();
+  const seenTitles = new Set();
+  const deduped = [];
+  
+  for(const e of events){
+    if(seenUrls.has(e.source_url)) continue; // exact URL match
+    seenUrls.add(e.source_url);
+    
+    // fuzzy title match to catch near-dupes (same story, different title wording)
+    let isDuplicate = false;
+    for(const seen of seenTitles){
+      const ratio = similarityRatio(e.title.toLowerCase(), seen.toLowerCase());
+      if(ratio > 0.75){
+        isDuplicate = true;
+        break;
+      }
+    }
+    if(!isDuplicate){
+      seenTitles.add(e.title);
+      deduped.push(e);
+    }
+  }
+  
+  // STEP 2: Score each unique event
+  const scored = deduped.map((e, idx) => {
     let score = 0;
     const tier = e.tier || '3';
+    
+    // Tier scoring (higher tier = higher priority)
     if(tier==='1') score += 100;
     else if(tier==='2') score += 50;
     else score += 10;
     
-    if(e.why_it_matters && e.why_it_matters.length > 0) score += 20;
+    // Impact bonus for articles with "why_it_matters"
+    if(e.why_it_matters && e.why_it_matters.length > 0) score += 30;
+    
+    // Recency bonus: newer articles ranked higher (assume earlier in list = newer)
+    score += Math.max(0, 20 - idx);
     
     return { event: e, score: score };
   });
-
-  // group by category + retailer
-  const grouped = {};
-  scored.forEach(item => {
-    const key = `${item.event.category}`;
-    if(!grouped[key]) grouped[key] = [];
-    grouped[key].push(item);
-  });
-
-  // sort within groups and extract top takeaway from each category
-  const takeaways = [];
-  Object.entries(grouped).forEach(([category, items]) => {
-    items.sort((a,b) => b.score - a.score);
-    if(items.length > 0) {
-      const top = items[0].event;
-      takeaways.push({
-        category: category,
-        retailer: top.retailer,
-        title: top.title,
-        insight: top.why_it_matters || top.snippet || top.title,
-        source_url: top.source_url,
-        pub_date: top.pub_date,
-        tier: top.tier
-      });
-    }
-  });
-
-  // rank by score and take top 5
-  const allScored = scored.map(item => ({
-    title: item.event.title,
-    insight: item.event.why_it_matters || item.event.snippet,
-    source_url: item.event.source_url,
-    category: item.event.category,
-    retailer: item.event.retailer,
-    pub_date: item.event.pub_date,
-    tier: item.event.tier,
-    score: item.score
-  }));
   
-  allScored.sort((a,b) => b.score - a.score);
-  return allScored.slice(0, 5);
+  // STEP 3: Diversity enforcement - build top takeaways with variety
+  const takeaways = [];
+  const usedRetailers = new Set();
+  const usedCategories = new Set();
+  
+  // Sort by score
+  scored.sort((a,b) => b.score - a.score);
+  
+  // Select top items with diversity constraints
+  for(const { event: e, score } of scored){
+    // Enforce max 2 items per retailer
+    const retailerCount = Array.from(usedRetailers).filter(x => x === e.retailer).length;
+    if(retailerCount >= 2) continue;
+    
+    // Prefer new categories but allow repeats if limited options
+    const categoryCount = Array.from(usedCategories).filter(x => x === e.category).length;
+    if(takeaways.length >= 3 && categoryCount > 0) continue; // after first 3, prefer new categories
+    
+    usedRetailers.add(e.retailer);
+    usedCategories.add(e.category);
+    
+    takeaways.push({
+      category: e.category,
+      retailer: e.retailer,
+      title: e.title,
+      insight: e.why_it_matters || e.snippet || e.title,
+      source_url: e.source_url,
+      pub_date: e.pub_date,
+      tier: e.tier
+    });
+    
+    if(takeaways.length >= 5) break; // stop after 5
+  }
+  
+  return takeaways;
+}
+
+// Helper: simple string similarity (0-1, where 1 = identical)
+function similarityRatio(a, b){
+  const longer = a.length > b.length ? a : b;
+  const shorter = a.length > b.length ? b : a;
+  if(longer.length === 0) return 1.0;
+  
+  const editDistance = getEditDistance(longer, shorter);
+  return (longer.length - editDistance) / longer.length;
+}
+
+function getEditDistance(s1, s2){
+  const costs = [];
+  for(let i = 0; i <= s1.length; i++){
+    let lastValue = i;
+    for(let j = 0; j <= s2.length; j++){
+      if(i === 0) costs[j] = j;
+      else if(j > 0){
+        let newValue = costs[j-1];
+        if(s1.charAt(i-1) !== s2.charAt(j-1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        costs[j-1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if(i > 0) costs[s2.length] = lastValue;
+  }
+  return costs[s2.length];
 }
 
 function renderTakeaways(takeaways){
   const container = el('takeaways');
-  if(!container || !takeaways || takeaways.length===0){
-    if(container) container.innerHTML = '';
+  if(!container) return;
+  
+  if(!takeaways || takeaways.length===0){
+    container.innerHTML = '';
+    return;
+  }
+  
+  const valid = takeaways.filter(tk => tk.source_url && tk.category && tk.retailer && tk.insight);
+  if(valid.length === 0){
+    container.innerHTML = '';
     return;
   }
   
@@ -186,20 +247,25 @@ function renderTakeaways(takeaways){
   const list = document.createElement('div');
   list.className = 'takeaways-list';
   
-  takeaways.forEach(tk => {
+  valid.forEach((tk, idx) => {
     const card = document.createElement('div');
     card.className = 'takeaway-card';
     const tierBadge = `<span class="tier-badge tier-${tk.tier}">${tk.tier}</span>`;
-    const dateStr = tk.pub_date ? `<span style="color:#999;font-size:12px">${tk.pub_date}</span>` : '';
+    const dateStr = tk.pub_date ? `<span style="color:#999;font-size:12px">${tk.pub_date}</span>` : '<span style="color:#ccc;font-size:12px">date unknown</span>';
+    const safeInsight = (tk.insight || '').substring(0, 200);
+    const linkText = 'Read more →';
     card.innerHTML = `
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <strong style="color:#0b5394">${tk.category}</strong>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <span style="color:#0b5394;font-weight:600;font-size:12px;flex-shrink:0">#${idx+1}</span>
+        <strong style="color:#0b5394;flex:1">${tk.category}</strong>
         ${tierBadge}
-        ${dateStr}
       </div>
-      <div style="font-weight:600;margin-bottom:6px">${tk.retailer}</div>
-      <div style="font-size:14px;line-height:1.4;margin-bottom:8px">${tk.insight}</div>
-      <a href="${tk.source_url}" target="_blank" style="color:#0b5394;text-decoration:none;font-size:12px">→ Read more</a>
+      <div style="font-weight:600;margin-bottom:4px;color:#333">${tk.retailer}</div>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px;color:#555">${safeInsight}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+        ${dateStr}
+        <a href="${tk.source_url}" target="_blank" rel="noopener" style="color:#0b5394;text-decoration:none;font-weight:600">${linkText}</a>
+      </div>
     `;
     list.appendChild(card);
   });
@@ -210,16 +276,21 @@ function renderTakeaways(takeaways){
 function renderEvent(e){
   const d = document.createElement('div');
   d.className = 'event';
+  
+  if(!e || !e.retailer || !e.title || !e.source_url) return d;
+  
   const brands = (e._brands && e._brands.length)?` <span style="color:#0b5394">[${e._brands.join(', ')}]</span>`:'';
   const dateStr = e.pub_date ? `<span class="pub-date">${e.pub_date}</span>` : '';
   const whyMatters = e.why_it_matters ? `<div class="why-matters">💡 ${e.why_it_matters}</div>` : '';
+  const safeUrl = (e.source_url || '').replace(/'/g, '&apos;');
+  
   d.innerHTML = `
     <div class="event-header">
       <div><strong>${e.retailer}</strong> — ${e.title} ${brands}</div>
       ${dateStr}
     </div>
     ${whyMatters}
-    <div class="meta"><a href="${e.source_url}" target="_blank">source</a> • ${e.category}</div>
+    <div class="meta"><a href="${safeUrl}" target="_blank" rel="noopener">source</a> • ${e.category || 'uncategorized'}</div>
   `;
   return d;
 }
@@ -304,6 +375,18 @@ async function load(){
     }
   }
 
+  // Validate event data: ensure required fields exist
+  events = events.filter(e => {
+    return e && e.retailer && e.title && e.source_url && typeof e !== 'string';
+  });
+
+  // Sort by pub_date (newest first) for better dedup and recency ranking
+  events.sort((a,b) => {
+    const dateA = new Date(a.pub_date || '2000-01-01').getTime();
+    const dateB = new Date(b.pub_date || '2000-01-01').getTime();
+    return dateB - dateA;
+  });
+
   if(retailer && retailer!=='all'){
     events = events.filter(e => e.retailer===retailer);
   }
@@ -319,7 +402,7 @@ async function load(){
   const discovered = Array.from(new Set(events.flatMap(e=>detectBrands(e.title,e.source_url))));
   if(discovered.length) populateBrandSelect(discovered);
 
-  el('status').innerText = '';
+  el('status').innerText = events.length > 0 ? `` : `No results. Try different date/filters.`;
   
   // generate and render takeaways before main event list
   const takeaways = generateTakeaways(events);
