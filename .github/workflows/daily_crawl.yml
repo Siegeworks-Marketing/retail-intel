@@ -10,11 +10,16 @@ on:
         required: false
         default: 'daily'
 
+permissions:
+  contents: write
+
 jobs:
   crawl:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -23,12 +28,16 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=src" >> $GITHUB_ENV
 
-      - run: python -m build.run_daily --mode "${{ github.event.inputs.mode || 'daily' }}"
+      - name: Run crawler
+        run: python -m build.run_daily --mode ${{ github.event.inputs.mode || 'daily' }}
 
       - name: Commit data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "retail-intel-bot"
           git config user.email "bot@github.com"
-          git add data
+          git add data || true
           git commit -m "Daily retail intelligence update" || echo "No changes"
-          git push
+          # push using the provided token to ensure write access
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }} || echo "Push failed"
