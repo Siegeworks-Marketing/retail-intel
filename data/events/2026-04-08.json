@@ -1079,17 +1079,6 @@
   },
   {
     "retailer": "Amazon",
-    "category": "Corporate Strategy",
-    "title": "The Conversational Report: A Consumer and Brand Survey on Texting Back",
-    "source_url": "https://retaildive.tradepub.com/c/pubRD.mpl?secure=1&sr=pp&_t=pp:&qf=w_posu02&ch=",
-    "pub_date": "",
-    "source_name": "Retail Dive - Amazon",
-    "snippet": "Retail Dive provides news and analysis for retail executives. We cover topics like retail tech, marketing, e-commerce, logistics, in-store operations, corporate retail news, and more. ",
-    "why_it_matters": "Leadership priorities and future direction \u2014 shapes long-term competitive posture",
-    "tier": "2"
-  },
-  {
-    "retailer": "Amazon",
     "category": "Store Footprint",
     "title": "Five AI Trends Shaping Retail Store Communications in 2026",
     "source_url": "https://resources.industrydive.com/ai-trends-shaping-retail-2026",
@@ -1102,12 +1091,23 @@
   {
     "retailer": "Amazon",
     "category": "Corporate Strategy",
-    "title": "Faster, Smarter Service With Slack: Streamline Team Collaboration and Reduce Costs",
-    "source_url": "http://resources.industrydive.com/faster-smarter-service-with-slack?utm_source=RD&utm_medium=Library&utm_campaign=Slack",
+    "title": "Managing Rising Utility Costs with Data-Driven Expense Strategies",
+    "source_url": "https://resources.industrydive.com/managing-utility-costs",
     "pub_date": "",
     "source_name": "Retail Dive - Amazon",
     "snippet": "Retail Dive provides news and analysis for retail executives. We cover topics like retail tech, marketing, e-commerce, logistics, in-store operations, corporate retail news, and more. ",
     "why_it_matters": "Leadership priorities and future direction \u2014 shapes long-term competitive posture",
+    "tier": "2"
+  },
+  {
+    "retailer": "Amazon",
+    "category": "Corporate Strategy",
+    "title": "Beyond the AI Hype: Scalable Data Products for Retail & CPG",
+    "source_url": "https://resources.industrydive.com/Beyond-the-AI-Hype-Scalable-Data-Products-for-Retail--CPG",
+    "pub_date": "",
+    "source_name": "Retail Dive - Amazon",
+    "snippet": "Retail Dive provides news and analysis for retail executives. We cover topics like retail tech, marketing, e-commerce, logistics, in-store operations, corporate retail news, and more. ",
+    "why_it_matters": "Leadership priorities and future direction \u2014 shapes long-term competitive posture | Tech focus indicates operational transformation",
     "tier": "2"
   },
   {
@@ -4215,6 +4215,17 @@
   {
     "retailer": "CVS",
     "category": "Corporate Strategy",
+    "title": "Why is no one talking about recoupments?",
+    "source_url": "https://resources.industrydive.com/Why-is-no-one-talking-about-recoupments",
+    "pub_date": "",
+    "source_name": "Healthcare Dive",
+    "snippet": "Healthcare Dive provides news, trends, jobs and resources for health industry professionals. We cover topics like healthcare IT, hospital administration, polcy & regulation, practice management, healt",
+    "why_it_matters": "Leadership priorities and future direction \u2014 shapes long-term competitive posture",
+    "tier": "2"
+  },
+  {
+    "retailer": "CVS",
+    "category": "Corporate Strategy",
     "title": "Adopting Data-Driven Retail Strategies to Improve Member Experience",
     "source_url": "http://resources.industrydive.com/data-driven-retail-strategies-to-improve-member-experience?utm_source=HD&utm_medium=Library&utm_campaign=VirginPulse",
     "pub_date": "",
@@ -4226,19 +4237,8 @@
   {
     "retailer": "CVS",
     "category": "Corporate Strategy",
-    "title": "Beyond the Hype: How to Deploy AI Summaries That Work in Practice",
-    "source_url": "https://resources.industrydive.com/deploy-ai-summaries",
-    "pub_date": "",
-    "source_name": "Healthcare Dive",
-    "snippet": "Healthcare Dive provides news, trends, jobs and resources for health industry professionals. We cover topics like healthcare IT, hospital administration, polcy & regulation, practice management, healt",
-    "why_it_matters": "Leadership priorities and future direction \u2014 shapes long-term competitive posture | Tech focus indicates operational transformation",
-    "tier": "2"
-  },
-  {
-    "retailer": "CVS",
-    "category": "Corporate Strategy",
-    "title": "Why is no one talking about recoupments?",
-    "source_url": "https://resources.industrydive.com/Why-is-no-one-talking-about-recoupments",
+    "title": "Leveraging Competitor Rate Data for Success",
+    "source_url": "https://resources.industrydive.com/leveraging-competitor-rate-data-for-success",
     "pub_date": "",
     "source_name": "Healthcare Dive",
     "snippet": "Healthcare Dive provides news, trends, jobs and resources for health industry professionals. We cover topics like healthcare IT, hospital administration, polcy & regulation, practice management, healt",
