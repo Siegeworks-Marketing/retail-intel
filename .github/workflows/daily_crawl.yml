@@ -37,6 +37,7 @@ jobs:
         run: |
           git config user.name "retail-intel-bot"
           git config user.email "bot@github.com"
+          # (previously copied data into docs/ for Pages) — now UI is at repo root so add data only
           git add data || true
           git commit -m "Daily retail intelligence update" || echo "No changes"
           # push using the provided token to ensure write access

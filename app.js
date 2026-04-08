@@ -36,30 +36,27 @@ async function load(){
   el('status').innerText = 'Loading...';
   let events = [];
   if(mode==='daily'){
-    // try several possible locations depending on how docs are served
     const candidates = [
       `/data/events/${date}.json`,
       `data/events/${date}.json`,
-      `../data/events/${date}.json`,
-      `./data/events/${date}.json`
+      `./data/events/${date}.json`,
+      `../data/events/${date}.json`
     ];
     for(const c of candidates){
       const part = await fetchJson(c);
       if(part && part.length){ events = part; break; }
     }
   } else {
-    // weekly: gather 7 days ending at date
     const start = new Date(date);
     for(let i=0;i<7;i++){
       const d = new Date(start);
       d.setDate(start.getDate()-i);
       const ds = dateToStr(d);
-      // try root and docs-relative locations for each day
       const candidates = [
         `/data/events/${ds}.json`,
         `data/events/${ds}.json`,
-        `../data/events/${ds}.json`,
-        `./data/events/${ds}.json`
+        `./data/events/${ds}.json`,
+        `../data/events/${ds}.json`
       ];
       let part = [];
       for(const c of candidates){
@@ -70,7 +67,6 @@ async function load(){
     }
   }
 
-  // filter by retailer
   if(retailer && retailer!=='all'){
     events = events.filter(e => e.retailer===retailer);
   }
@@ -80,6 +76,4 @@ async function load(){
 }
 
 el('load').addEventListener('click', load);
-
-// auto-load today's daily on open
 load();
