@@ -14,7 +14,12 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
-      - run: python src/build/run_daily.py
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=src" >> $GITHUB_ENV
+
+      - run: python -m build.run_daily
+
       - name: Commit data
         run: |
           git config user.name "retail-intel-bot"

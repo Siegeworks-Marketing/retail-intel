@@ -1,16 +1,9 @@
-
-import sys
-import os
-
-# ✅ Ensure src/ is on the Python path
-sys.path.append(os.path.abspath("src"))
-
 from crawl.sources import SOURCES
 from crawl.fetch import fetch
 from crawl.parse import parse
 from distill.events import build_events
 from datetime import date
-import json
+import json, os
 
 today = date.today().isoformat()
 
@@ -28,3 +21,4 @@ with open(f"data/events/{today}.json", "w") as f:
     json.dump(all_events, f, indent=2)
 
 print(f"Wrote {len(all_events)} events")
+``
